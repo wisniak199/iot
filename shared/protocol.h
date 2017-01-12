@@ -1,5 +1,5 @@
-#include <string>
 #include <sstream>
+#include <string>
 
 #define BUFFER_SIZE 256
 #define SLEEP_TIME 1
@@ -16,10 +16,9 @@ struct SensorData {
 
 struct SensorDataStream {
     char buffer[BUFFER_SIZE];
-    int begin;
-    int end;
+    unsigned begin, end;
     SensorData now;
-    SensorDataStream() : begin(0), end(0) { }
+    SensorDataStream() : begin(0), end(0) {}
     SensorData get() { return now; }
     int read_data(nRF24L01P *radio, int pipe);
     int next(nRF24L01P *radio, int pipe);
@@ -27,7 +26,7 @@ struct SensorDataStream {
 
 int SensorDataStream::read_data(nRF24L01P *radio, int pipe) {
     if (begin != 0) {
-        for (int i = begin; i < end; ++i) {
+        for (unsigned i = begin; i < end; ++i) {
             buffer[i - begin] = buffer[i];
         }
         end -= begin;
@@ -47,9 +46,8 @@ int SensorDataStream::next(nRF24L01P *radio, int pipe) {
         int res = read_data(radio, pipe);
         if (res < 0) return -1;
     }
-    
-    SensorData *temp = (SensorData*) (buffer + begin);
-    //memcpy(&(stream->now), temp, sizeof(SensorData));
+
+    SensorData *temp = (SensorData *)(buffer + begin);
     now.sensor_type = temp->sensor_type;
     now.value = temp->value;
     begin += sizeof(SensorData);
