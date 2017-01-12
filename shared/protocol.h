@@ -5,7 +5,7 @@
 #define SLEEP_TIME 1
 
 // TODO: dopisać więcej typów
-enum SensorType {
+enum class SensorType {
     TEMPERATURE,
 };
 
@@ -57,7 +57,7 @@ int SensorDataStream::next(nRF24L01P *radio, int pipe) {
 // TODO: ogarniać więcej typów
 std::string sensor_type_to_string(SensorType type) {
     switch (type) {
-        case TEMPERATURE:
+        case SensorType::TEMPERATURE:
             return "temp";
         default:
             return "unknown";

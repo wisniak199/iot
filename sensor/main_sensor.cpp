@@ -73,7 +73,7 @@ int main() {
 
     for (int msg_counter = 0; true; msg_counter++) {
         SensorData data;
-        data.sensor_type = TEMPERATURE;
+        data.sensor_type = SensorType::TEMPERATURE;
         data.value = msg_counter;
 
         while (true) {
