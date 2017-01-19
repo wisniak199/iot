@@ -5,6 +5,7 @@
 #include "mbed.h"
 #include "nRF24L01P.h"
 #include "protocol.h"
+#include "RCSwitch.h"
 
 //***************************************************************************//
 // !!! SETTINGS !!!
@@ -36,6 +37,13 @@ nRF24L01P radio(PB_15, PB_14, PB_13, PB_12, PB_1, PB_2);
 
 DigitalOut myled1(LED1);
 // InterruptIn button(USER_BUTTON);
+
+RCSwitch sw(PC_3);
+
+#define SW_ADDR "11111"
+#define SW_C "00100"
+
+const char RC_ON = '1';
 
 std::string int_to_string(int x) {
     std::stringstream s;
@@ -85,16 +93,49 @@ const std::string http_header =
     "Accept: */*\r\n" + "Content-Length: 78\r\n" +
     "Content-Type: application/x-www-form-urlencoded\r\n" + "\r\n";
 
+    
+char char_from_PC = '\0';
+bool rc_enabled = false;
+
+void rc(bool on) {
+    // pc.printf("RC(%d), state = %d\r\n", (int) on, rc_enabled); 
+    if (rc_enabled == on) {
+        return;
+    }
+    if (on) {
+        // pc.printf("SWITCHING ONNNNNNNN\r\n");
+        sw.switchOn(SW_ADDR, SW_C);
+    } else {
+        // pc.printf("SWITCHING OFF\r\n");
+        sw.switchOff(SW_ADDR, SW_C);
+    }
+    rc_enabled = on;
+}
+
+void wifi_callback() {
+    char_from_PC = wifi.getc();
+    char newline = wifi.getc();
+}
+    
 int main() {
     pc.baud(115200);
     init_radio();
+    
     wifi.baud(115200);
+    wifi.attach(&wifi_callback);
 
     SensorDataStream stream;
-    while (1) {
-        pc.printf("TRYING NEXT FROM SENSOR\r\n");
+    
+    while (true) {
+        if (char_from_PC != '\0') {
+            // pc.printf("GOT CHAR '%c' '%c' '%d'\r\n", char_from_PC, RC_ON, char_from_PC == RC_ON);
+            rc(char_from_PC == RC_ON);
+            char_from_PC = '\0';
+        }
+       // pc.printf("TRYING NEXT FROM SENSOR\r\n");
+        // wait_ms(200);
         if (stream.next(&radio, NRF24L01P_PIPE_P1) == -1) {
-            pc.printf("error in next \r\n");
+            // pc.printf("error in next \r\n");
             continue;
         }
         SensorData data = stream.get();
