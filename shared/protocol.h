@@ -42,6 +42,9 @@ int SensorDataStream::read_data(nRF24L01P *radio, int pipe) {
 }
 
 int SensorDataStream::next(nRF24L01P *radio, int pipe) {
+    if (!radio->readable(pipe)) {
+        return -1;
+    } 
     while (end - begin < sizeof(SensorData)) {
         int res = read_data(radio, pipe);
         if (res < 0) return -1;
