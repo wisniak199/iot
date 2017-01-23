@@ -7,6 +7,7 @@
 // TODO: dopisać więcej typów
 enum class SensorType {
     TEMPERATURE,
+    LIGHT,
 };
 
 struct SensorData {
@@ -44,7 +45,7 @@ int SensorDataStream::read_data(nRF24L01P *radio, int pipe) {
 int SensorDataStream::next(nRF24L01P *radio, int pipe) {
     if (!radio->readable(pipe)) {
         return -1;
-    } 
+    }
     while (end - begin < sizeof(SensorData)) {
         int res = read_data(radio, pipe);
         if (res < 0) return -1;
@@ -62,6 +63,8 @@ std::string sensor_type_to_string(SensorType type) {
     switch (type) {
         case SensorType::TEMPERATURE:
             return "temp";
+        case SensorType::LIGHT:
+            return "light";
         default:
             return "unknown";
     }
