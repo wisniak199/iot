@@ -133,7 +133,7 @@ int main() {
             char_from_PC = '\0';
         }
         pc.printf("TRYING NEXT FROM SENSOR\r\n");
-        wait_ms(500);
+        wait_ms(100);
         if (stream.next(&radio, NRF24L01P_PIPE_P1) == -1) {
             // pc.printf("error in next \r\n");
             continue;
@@ -155,6 +155,6 @@ int main() {
                             (float) data.value);
         pc.printf("Sending to HTTP SERVER %s\r\n", http.c_str());
         wifi.printf("%s", http.c_str());
-        wait_ms(500);
+        wait_ms(100);
     }
 }
