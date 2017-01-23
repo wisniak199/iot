@@ -4,11 +4,47 @@
 #define BUFFER_SIZE 256
 #define SLEEP_TIME 1
 
-// TODO: dopisać więcej typów
-enum class SensorType {
-    TEMPERATURE,
-    LIGHT,
-};
+enum SensorType {Temperature, Grayscale, UV, Moisture, Push, Flame, Movement, Unknown};
+
+const int LIGHT_VERY_DARK = 0; // w plecaku
+const int LIGHT_DARK = 1; // pod stołem
+const int LIGHT_MEDIUM = 2; // typowa jasność w labach w pochmurny dzień
+const int LIGHT_BRIGHT = 3; // sensor skierowany w stronę okna lub zapalone lampy
+const int LIGHT_VERY_BRIGHT = 4; // sensor na zewnątrz
+
+const int PUSH_OFF = 0;
+const int PUSH_ON = 1;
+
+const int MOVEMENT_NOT_DETECTED = 0;
+const int MOVEMENT_DETECTED = 1;
+
+const int FLAME_DETECTED = 1;
+const int FLAME_NOT_DETECTED = 0;
+
+const int SOIL_DRY = 0; // ziemia to wióry, nie ma czego zbierać
+const int SOIL_OPTIMAL =  1; // jest ok, chyba ze to kaktus 🙂
+const int SOIL_TOO_HUMID = 2; // błoto / woda
+
+std::string sensor_type_to_string(SensorType type) {
+    switch (type) {
+        case Temperature:
+            return "temperature";
+        case Grayscale:
+            return "grayscale";
+        case UV:
+            return "ultraviolet";
+        case Moisture:
+            return "moisture";
+        case Push:
+            return "push";
+        case Flame:
+            return "flame";
+        case Movement:
+            return "movement";
+        default:
+            return "unknown";
+    }
+}
 
 struct SensorData {
     SensorType sensor_type;
@@ -56,16 +92,4 @@ int SensorDataStream::next(nRF24L01P *radio, int pipe) {
     now.value = temp->value;
     begin += sizeof(SensorData);
     return 0;
-}
-
-// TODO: ogarniać więcej typów
-std::string sensor_type_to_string(SensorType type) {
-    switch (type) {
-        case SensorType::TEMPERATURE:
-            return "temp";
-        case SensorType::LIGHT:
-            return "light";
-        default:
-            return "unknown";
-    }
 }
