@@ -90,18 +90,18 @@ void init_radio() {
 const std::string http_header =
     std::string("POST /write?db=test HTTP/1.1\r\n") +
     "User-Agent: curl/7.35.0\r\n" + "Host: localhost:9090\r\n" +
-    "Accept: */*\r\n" + "Content-Length: 78\r\n" +
-    "Content-Type: application/x-www-form-urlencoded\r\n" + "\r\n";
+    "Content-Type: application/x-www-form-urlencoded\r\n" +
+    "Accept: */*\r\n";
 
-    
+
 char char_from_PC = '\0';
 bool rc_enabled = false;
 
 void rc(bool on) {
-    // pc.printf("RC(%d), state = %d\r\n", (int) on, rc_enabled); 
-    if (rc_enabled == on) {
+    // pc.printf("RC(%d), state = %d\r\n", (int) on, rc_enabled);
+    /* if (rc_enabled == on) {
         return;
-    }
+    }*/
     if (on) {
         // pc.printf("SWITCHING ONNNNNNNN\r\n");
         sw.switchOn(SW_ADDR, SW_C);
@@ -116,38 +116,45 @@ void wifi_callback() {
     char_from_PC = wifi.getc();
     char newline = wifi.getc();
 }
-    
+
 int main() {
     pc.baud(115200);
     init_radio();
-    
+
     wifi.baud(115200);
     wifi.attach(&wifi_callback);
 
     SensorDataStream stream;
-    
+
     while (true) {
         if (char_from_PC != '\0') {
-            // pc.printf("GOT CHAR '%c' '%c' '%d'\r\n", char_from_PC, RC_ON, char_from_PC == RC_ON);
+            pc.printf("GOT CHAR '%c' '%c' '%d'\r\n", char_from_PC, RC_ON, char_from_PC == RC_ON);
             rc(char_from_PC == RC_ON);
             char_from_PC = '\0';
         }
-       // pc.printf("TRYING NEXT FROM SENSOR\r\n");
-        // wait_ms(200);
+        pc.printf("TRYING NEXT FROM SENSOR\r\n");
+        wait_ms(500);
         if (stream.next(&radio, NRF24L01P_PIPE_P1) == -1) {
             // pc.printf("error in next \r\n");
             continue;
         }
         SensorData data = stream.get();
 
-        std::string http = http_header + "iot,type=" +
-                           sensor_type_to_string(data.sensor_type) + " value=" +
-                           int_to_string(data.value) + "\r\n";
+        std::string http_data =
+          "iot,type=" + sensor_type_to_string(data.sensor_type) +
+          " value=" + int_to_string(data.value) + "\n";
+        std::string http =
+          http_header +
+          "Content-Length: " +  int_to_string(http_data.size()) +
+          "\r\n\r\n" + http_data + "\r\n\r\n";
+
 
         pc.printf("RECEIVED FROM SENSOR = %d %d\r\n", data.sensor_type,
                   data.value);
+        pc.printf("RECEIVED FROM SENSOR = %f %f\r\n", (float) data.sensor_type,
+                            (float) data.value);
         pc.printf("Sending to HTTP SERVER %s\r\n", http.c_str());
-        wifi.write((const uint8_t *)http.c_str(), http.size(), 0, 0);
+        wifi.printf("%s", http.c_str());
         wait_ms(500);
     }
 }
