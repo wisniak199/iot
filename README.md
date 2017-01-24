@@ -1,3 +1,7 @@
+# Presentation
+You can find project presentation
+[here](https://docs.google.com/presentation/d/1hUlK1RsZiFjX9cnxC7wpaolrl5mcfRCkvJgFPqZJQYg/pub?start=false&loop=false&delayms=3000).
+
 # Build
 You need gcc/g++ for arm.
 
