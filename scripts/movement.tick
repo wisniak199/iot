@@ -1,0 +1,11 @@
+stream
+  |from()
+    .database('test')
+    .measurement('iot')
+    .where(lambda: "type" == 'movement')
+  |alert()
+    .stateChangesOnly()
+    .log('/home/wisniak199/kapacitor_movement.log')
+    .info(lambda: "value" == 1)
+    .warn(lambda: "value" == 0)
+    .exec('/home/wisniak199/iot/serwer/scripts/movement.py')
